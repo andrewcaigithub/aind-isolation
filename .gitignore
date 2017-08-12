@@ -94,4 +94,10 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# PyCharm project file
+.idea/
+
+# aind-isolation submission result
+isolation-*
+
 # End of https://www.gitignore.io/api/python
