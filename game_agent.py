@@ -170,6 +170,32 @@ class MinimaxPlayer(IsolationPlayer):
         # Return the best move from the last completed search iteration
         return best_move
 
+    def min_value(self, game, depth):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if depth == 0 or len(game.get_legal_moves()) == 0:
+            return self.score(game, self)
+
+        value = float("inf")
+        for move in game.get_legal_moves():
+            value = min(value, self.max_value(game.forecast_move(move), depth - 1))
+        return value
+
+    def max_value(self, game, depth):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if depth == 0 or len(game.get_legal_moves()) == 0:
+            return self.score(game, self)
+
+        value = float("-inf")
+        for move in game.get_legal_moves():
+            value = max(value, self.min_value(game.forecast_move(move), depth - 1))
+        return value
+
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
         the lectures.
@@ -209,11 +235,24 @@ class MinimaxPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
+
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        legal_moves = game.get_legal_moves()
+
+        # initialize the best score and best move
+        best_score = float("-inf")
+        best_move = (-1, -1)
+
+        # for each legal move, implement recursive search
+        for move in legal_moves:
+            score = self.min_value(game.forecast_move(move), depth-1)
+            if score > best_score:
+                best_score = score
+                best_move = move
+
+        return best_move
 
 
 class AlphaBetaPlayer(IsolationPlayer):
