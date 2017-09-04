@@ -2,12 +2,18 @@
 test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
-import random
+import math
 
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
+
+
+def centrality(game, move):
+    x, y = move
+    cx, cy = (math.ceil(game.width / 2), math.ceil(game.height / 2))
+    return (game.width - cx) ** 2 + (game.height - cy) ** 2 - (x - cx) ** 2 - (y - cy) ** 2
 
 
 def custom_score(game, player):
@@ -34,8 +40,31 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    my_moves = game.get_legal_moves(player)
+    opponent_moves = game.get_legal_moves(game.get_opponent(player))
+
+    game_state_factor = 1
+    if len(game.get_blank_spaces()) < game.width * game.height / 4.:
+        game_state_factor = 4
+
+    # Four corners
+    corners = [(0, 0),
+               (0, (game.width - 1)),
+               ((game.height - 1), 0),
+               ((game.height - 1), (game.width - 1))]
+
+    my_moves_in_corner = [move for move in my_moves if move in corners]
+    opponent_moves_in_corner = [move for move in opponent_moves if move in corners]
+
+    return float(len(my_moves) - (game_state_factor * len(my_moves_in_corner))
+                 - len(opponent_moves) + (game_state_factor * len(opponent_moves_in_corner)))
 
 
 def custom_score_2(game, player):
@@ -60,8 +89,17 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    my_moves = len(game.get_legal_moves(player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return float(len(my_moves) - len(opponent_moves) + centrality(game, game.get_player_location(player)))
 
 
 def custom_score_3(game, player):
@@ -86,8 +124,17 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    my_moves = len(game.get_legal_moves(player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return float(my_moves - opponent_moves)
 
 
 class IsolationPlayer:
